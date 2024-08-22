@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        .search-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .expanded-form {
+            display: none;
+            top: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            padding: 10px;
+            z-index: 10;
+        }
+
+        textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            resize: none;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button, input[type="submit"] {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        /* Container für alle Aufgaben */
+        .t-list-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Stil für jede einzelne Karte */
+        .task-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* Hover-Effekt für Karten */
+        .task-card:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Stil für den Header (ID und Titel) */
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Stil für den Titel */
+        .task-title {
+            font-size: 16px;
+            color: #333;
+        }
+
+        /* Stil für den Inhalt */
+        .task-content {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+            white-space: pre-wrap; /* Lässt Zeilenumbrüche zu */
+            word-wrap: break-word;
+        }
+
+        /* Stil für den Footer (mit Button) */
+        .task-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Stil für den Löschen-Button */
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Hover-Effekt für den Löschen-Button */
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+    <div class="content">
+        <div class="new-task-container">
+            <input type="text" class="search-field" placeholder="write task...">
+            <div class="expanded-form row">
+                <form method="POST">
+                    <textarea id="t-title"
+                              name="title"
+                              placeholder="Title"
+                              cols="30" rows="1"></textarea>
+                    <textarea id="t-content"
+                              name="content"
+                              placeholder="Content"
+                              cols="30" rows="5"></textarea>
+                    <div class="form-buttons">
+                        <input type="submit" value="Speichern">
+                        <button type="button" class="cancel-btn">Abbrechen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchField = document.querySelector('.search-field');
+                const expandedForm = document.querySelector('.expanded-form');
+                const cancelBtn = document.querySelector('.cancel-btn');
+            
+                searchField.addEventListener('click', function() {
+                    searchField.style.display = 'none';
+                    expandedForm.style.display = 'block';
+                });
+            
+                cancelBtn.addEventListener('click', function() {
+                    expandedForm.style.display = 'none';
+                    searchField.style.display = 'block';
+                });
+            });
+        </script>
+            
+            
+        <div class="t-list-container">
+            {% for task in tasks %}
+                <div class="task-card">
+                    <div class="task-header">
+                        <b class="task-title">{{ task.title }}</b>
+                    </div>
+                    <div class="task-content">
+                        <p>{{ task.content }}</p>
+                    </div>
+                    <div class="task-footer">
+                            <!-- Button to trigger the modal -->
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tagModal" data-task-id="{{ task.id }}">
+                            Tag
+                        </button>
+                        <form action="{{ url_for('tasks.delete_task', id=task.id) }}" method="POST">
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+                        {% include 'tags/index.html' %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

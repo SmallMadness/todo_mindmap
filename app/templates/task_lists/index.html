@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <span class="title">
+        <h1>{% block title %} Task Lists {% endblock %}</h1>
+    </span>
+    <div class="task_lists">
+        <h2>Task Lists Blueprint</h2>
+        <div class="task_list">
+            <div class="new-task_list">
+                <form method="POST">
+                    <p>
+                        <textarea id="tl-title"
+                                name="title"
+                                placeholder="Title"
+                                cols="30" rows="3"></textarea>
+                    </p>
+                    <textarea id="tl-content"
+                            name="content"
+                            placeholder="Content"
+                            cols="30" rows="3"></textarea>
+                    <p><input type="submit"></p>
+                </form>
+            </div>
+            <div class="task_list-list">
+                {% for task_list in task_lists %}
+                    <div class="task_list">
+                        <h4>{{ task_list.title }}</h4>
+                        <hr>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tag Modal - Notes Mindmap</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Dein CSS-Styling hier */
+    </style>
+</head>
+<body>
+
+    <!-- Modal -->
+    <div class="modal fade" id="tagModal" tabindex="-1" aria-labelledby="tagModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tagModalLabel">Tags verwalten</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Eingabefeld für neuen Tag -->
+                    <div class="input-group mb-3">
+                        <form method="POST" action="{{ url_for('tags.index') }}">
+                            <input name="tag_name" type="text" class="form-control" placeholder="Neuen Tag hinzufügen" aria-label="New Tag">
+                            <button class="btn btn-outline-secondary" type="submit">Hinzufügen</button>
+                        </form>
+                    </div>
+
+                    <!-- Liste der Tags -->
+                    <div class="tags-list">
+                        <h6>Vorhandene Tags:</h6>
+                        <ul id="tagsList" class="list-group">
+                            <!-- Die Tags werden hier mit JavaScript eingefügt -->
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="saveTagsBtn">Speichern</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript und Fetch-API für das dynamische Laden der Tags -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Modal-Event-Listener, um die Tags zu laden
+            const tagModal = document.getElementById('tagModal');
+            tagModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button, der das Modal öffnet
+                const taskId = button.getAttribute('data-task-id'); // Hol die Task-ID
+                tagModal.setAttribute('data-task-id', taskId); // Task-ID im Modal speichern
+
+                loadTags(); // Lädt Tags beim Öffnen des Modals
+            });
+
+            // Funktion, um die ausgewählten Tag-IDs zu sammeln
+            function getSelectedTagIds() {
+                const checkboxes = document.querySelectorAll('input[name="tag-checkbox"]:checked');
+                const tagIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+                return tagIds;
+            }
+
+            function loadTags() {
+                fetch("{{ url_for('tags.get_tags') }}")
+                    .then(response => response.json())
+                    .then(data => updateTagList(data))
+                    .catch(error => handleError(error, 'Fehler beim Laden der Tags'));
+            }
+
+            // Funktion zum Laden der Tags
+            function loadTags() {
+                fetch("{{ url_for('tags.get_tags') }}")
+                    .then(response => response.json())
+                    .then(data => updateTagList(data))
+                    .catch(error => handleError(error, 'Fehler beim Laden der Tags'));
+            }
+
+            // Funktion zur Aktualisierung der Tag-Liste im Modal
+            function updateTagList(tags) {
+                const tagsList = document.getElementById('tagsList');
+                tagsList.innerHTML = '';
+
+                tags.forEach(tag => {
+                    const listItem = createTagListItem(tag);
+                    tagsList.appendChild(listItem);
+                });
+            }
+
+            // Funktion zur Erstellung eines Listenelements für einen Tag mit Checkbox
+            function createTagListItem(tag) {
+                const listItem = document.createElement('li');
+                listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+
+                const tagWrapper = document.createElement('div');
+                tagWrapper.classList.add('d-flex', 'align-items-center');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('form-check-input', 'me-2');
+                checkbox.name = 'tag-checkbox';
+                checkbox.value = tag.id;
+
+                const tagText = document.createElement('span');
+                tagText.textContent = tag.name;
+
+                tagWrapper.appendChild(checkbox);
+                tagWrapper.appendChild(tagText);
+                listItem.appendChild(tagWrapper);
+
+                return listItem;
+            }
+
+
+
+            const taskId = tagModal.getAttribute('data-task-id') // Beispielhafte Task-ID
+            print(taskId)
+         
+            const updatedTaskData = {
+                title: 'Updated Task Title',
+                content: 'Updated Task Content',
+                tag_ids: [1, 2, 3]  // IDs der Tags, die du zuweisen möchtest
+            };
+
+            fetch(`/tasks/${taskId}`, {
+                method: 'PUT', // oder 'PATCH'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedTaskData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+
+    </script>
+</body>
+</html>
